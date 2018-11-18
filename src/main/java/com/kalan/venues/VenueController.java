@@ -1,7 +1,6 @@
 package com.kalan.venues;
 
-import com.kalan.venues.model.Recommendations;
-import com.kalan.venues.model.Venue;
+import com.kalan.venues.model.RecommendationsResource;
 import com.kalan.venues.service.VenueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -29,15 +28,16 @@ public class VenueController {
     }
 
     @RequestMapping(value = RECOMMENDATIONS, method = RequestMethod.GET, produces = {"application/hal+json"})
-    public HttpEntity<Recommendations> recommendations(
+    public HttpEntity<RecommendationsResource> recommendations(
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "venue") String venue) {
 
-        List<Venue> venues = venueService.retrieveRecommendations(location, venue);
+        RecommendationsResource recommendationsResource = ofNullable(venueService.retrieveRecommendations(location, venue))
+                .map(r -> new RecommendationsResource(r.getMatch(), r.getVenues()))
+                .orElse(new RecommendationsResource(null, emptyList()));
 
-        Recommendations recommendations = new Recommendations(venues);
-        recommendations.add(linkTo(methodOn(VenueController.class).recommendations(location, venue)).withSelfRel());
+        recommendationsResource.add(linkTo(methodOn(VenueController.class).recommendations(location, venue)).withSelfRel());
 
-        return new ResponseEntity<>(recommendations, HttpStatus.OK);
+        return new ResponseEntity<>(recommendationsResource, HttpStatus.OK);
     }
 }

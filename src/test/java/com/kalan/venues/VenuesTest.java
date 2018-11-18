@@ -18,8 +18,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.UnsupportedEncodingException;
 
 import static com.kalan.venues.model.Location.Builder.location;
+import static com.kalan.venues.model.Recommendations.recommendations;
 import static com.kalan.venues.model.Venue.venue;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -65,7 +67,7 @@ public class VenuesTest {
         String venue = "spitafields";
 
         when(venueService.retrieveRecommendations(location, venue))
-                .thenReturn(asList(
+                .thenReturn(recommendations(venue("000", "spitafields", 50.1, -0.06), asList(
                         venue("123", "Beer O'Clock", location()
                                 .withAddress("79 Enid St")
                                 .withLat(51.497517)
@@ -85,7 +87,7 @@ public class VenuesTest {
                                 .withCity("London")
                                 .withState("Greater London")
                                 .withCountry("United Kingdom")
-                                .build(), "cafe")));
+                                .build(), "cafe"))));
 
         mvc.perform(get(RECOMMENDATIONS)
                 .param("location", location)
@@ -124,6 +126,27 @@ public class VenuesTest {
                         "      \"type\": \"cafe\"\n" +
                         "    }\n" +
                         "  ]", "$.recommendations"));
+    }
+
+    @Test
+    public void returnsMatch() throws Exception {
+        String location = "london";
+        String venue = "spitafields";
+
+        when(venueService.retrieveRecommendations(location, venue))
+                .thenReturn(recommendations(venue("101", "spitafields", 50.1, -0.06), emptyList()));
+
+        mvc.perform(get(RECOMMENDATIONS)
+                .param("location", location)
+                .param("venue", venue)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.match.id", equalTo("101")))
+                .andExpect(jsonPath("$.match.name", equalTo("spitafields")))
+                .andExpect(result -> hasJson(result, "{\n" +
+                "  \"lat\": 50.1,\n" +
+                "  \"lng\": -0.06\n" +
+                "}", "$.match.location"));
     }
 
     private void hasJson(MvcResult result, String expected, String jsonPath) throws JSONException, UnsupportedEncodingException {

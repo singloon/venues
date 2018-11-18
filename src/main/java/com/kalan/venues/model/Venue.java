@@ -1,11 +1,14 @@
 package com.kalan.venues.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kalan.venues.model.foursquare.explore.Category;
 
 import java.util.Objects;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Optional.ofNullable;
 
+@JsonInclude(NON_NULL)
 public class Venue {
     private final String id;
     private final String name;
@@ -23,8 +26,17 @@ public class Venue {
         return new Venue(id, name, location, type);
     }
 
+    public static Venue venue(String id, String name, Double lat, Double lng) {
+        return new Venue(id, name, Location.Builder.location().withLat(lat).withLng(lng).build(), null);
+    }
+
     public static Venue venue(com.kalan.venues.model.foursquare.explore.Venue returned) {
         return new Venue(returned.getId(), returned.getName(), location(returned), type(returned));
+    }
+
+    public static Venue venue(com.kalan.venues.model.foursquare.search.Venue returned) {
+        com.kalan.venues.model.foursquare.search.Location location = returned.getLocation();
+        return new Venue(returned.getId(), returned.getName(), Location.Builder.location().withLat(location.getLat()).withLng(location.getLng()).build(), null);
     }
 
     private static Location location(com.kalan.venues.model.foursquare.explore.Venue returned) {

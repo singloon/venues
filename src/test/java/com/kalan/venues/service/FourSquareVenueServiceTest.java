@@ -1,5 +1,6 @@
 package com.kalan.venues.service;
 
+import com.kalan.venues.model.Recommendations;
 import com.kalan.venues.model.Venue;
 import com.kalan.venues.model.foursquare.explore.*;
 import com.kalan.venues.model.foursquare.search.Location;
@@ -10,10 +11,12 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.kalan.venues.Matchers.feature;
 import static com.kalan.venues.model.Location.Builder.location;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,16 +41,16 @@ public class FourSquareVenueServiceTest {
                                 exploreLocation("555 Pub street", 12.5, 22.5, "CAC DOD"),
                                 "Brewery")))));
 
-        assertThat(fourSquareVenueService.retrieveRecommendations(location, venue), contains(
+        assertThat(fourSquareVenueService.retrieveRecommendations(location, venue), feature(Recommendations::getVenues, contains(
                 Venue.venue("456", "Brown Cup", location()
-                    .withAddress("123 Yellow Brick")
-                    .withLat(12.1)
-                    .withLng(20.5)
-                    .withPostalCode("AAA BBB")
-                    .withCc("GB")
-                    .withCity("London")
-                    .withState("London")
-                    .withCountry("England").build(), "Coffee Shop"),
+                        .withAddress("123 Yellow Brick")
+                        .withLat(12.1)
+                        .withLng(20.5)
+                        .withPostalCode("AAA BBB")
+                        .withCc("GB")
+                        .withCity("London")
+                        .withState("London")
+                        .withCountry("England").build(), "Coffee Shop"),
                 Venue.venue("789", "Beer O'Clock", location()
                         .withAddress("555 Pub street")
                         .withLat(12.5)
@@ -56,8 +59,18 @@ public class FourSquareVenueServiceTest {
                         .withCc("GB")
                         .withCity("London")
                         .withState("London")
-                        .withCountry("England").build(), "Brewery"))
-        );
+                        .withCountry("England").build(), "Brewery"))));
+    }
+
+    @Test
+    public void returnsMatch() {
+        String location = "london";
+        String venue = "spitafields";
+
+        when(fourSquareClient.search(location, venue))
+                .thenReturn(searchResult(matchingVenue("123", venue, new Location(10.0, 20.0))));
+
+        assertThat(fourSquareVenueService.retrieveRecommendations(location, venue), feature(Recommendations::getMatch, equalTo(Venue.venue("123", venue, 10.0, 20.0))));
     }
 
     private ExploreResponse exploreResponse(Item... items) {

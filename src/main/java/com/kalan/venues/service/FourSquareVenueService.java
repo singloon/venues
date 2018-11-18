@@ -1,5 +1,6 @@
 package com.kalan.venues.service;
 
+import com.kalan.venues.model.Recommendations;
 import com.kalan.venues.model.Venue;
 import com.kalan.venues.model.foursquare.explore.ExploreResponse;
 import com.kalan.venues.model.foursquare.explore.ExploreResult;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.kalan.venues.model.Recommendations.recommendations;
+import static com.kalan.venues.model.Venue.venue;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -30,7 +33,7 @@ public class FourSquareVenueService implements VenueService {
     }
 
     @Override
-    public List<Venue> retrieveRecommendations(String location, String venue) {
+    public Recommendations retrieveRecommendations(String location, String venue) {
         SearchResult search = fourSquareClient.search(location, venue);
         Optional<com.kalan.venues.model.foursquare.search.Venue> returnedVenue = ofNullable(search.getSearchResponse())
                 .map(SearchResponse::getVenues)
@@ -38,15 +41,17 @@ public class FourSquareVenueService implements VenueService {
 
         if (!returnedVenue.isPresent()) {
             logger.info("Could not find any matching venues for {}, location {}", venue, location);
-            return emptyList();
+            return recommendations(null, emptyList());
         }
         Optional<ExploreResult> returnedExploreResult = returnedVenue
                 .map(com.kalan.venues.model.foursquare.search.Venue::getLocation)
                 .map(coordinates -> fourSquareClient.explore(coordinates.getLat(), coordinates.getLng()));
 
+        Venue match = venue(returnedVenue.get());
+
         if (!returnedExploreResult.isPresent()) {
             logger.info("Could not find any recommendations for {}", venue);
-            return emptyList();
+            return recommendations(match, emptyList());
         }
 
         List<com.kalan.venues.model.foursquare.explore.Venue> returnedVenues = returnedExploreResult
@@ -60,7 +65,7 @@ public class FourSquareVenueService implements VenueService {
                                 .collect(toList())).orElse(emptyList());
 
 
-        return mapVenues(returnedVenues);
+        return recommendations(match, mapVenues(returnedVenues));
     }
 
     private List<Venue> mapVenues(List<com.kalan.venues.model.foursquare.explore.Venue> returnedVenues) {

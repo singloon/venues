@@ -1,9 +1,7 @@
 package com.kalan.venues.service;
 
-import com.kalan.venues.model.Venue;
-
-import java.util.List;
+import com.kalan.venues.model.Recommendations;
 
 public interface VenueService {
-    List<Venue> retrieveRecommendations(String location, String venue);
+    Recommendations retrieveRecommendations(String location, String venue);
 }

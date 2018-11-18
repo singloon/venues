@@ -1,7 +1,12 @@
 package com.kalan.venues.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_NULL)
 public class Location {
     private final String address;
     private final Double lat;

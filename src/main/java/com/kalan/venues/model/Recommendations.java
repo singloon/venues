@@ -1,16 +1,22 @@
 package com.kalan.venues.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.hateoas.ResourceSupport;
-
 import java.util.List;
 
-public class Recommendations extends ResourceSupport {
-    @JsonProperty("recommendations")
+public class Recommendations {
+    private final Venue match;
     private final List<Venue> venues;
 
-    public Recommendations(List<Venue> venues) {
+    private Recommendations(Venue match, List<Venue> venues) {
+        this.match = match;
         this.venues = venues;
+    }
+
+    public static Recommendations recommendations(Venue match, List<Venue> recommendations) {
+        return new Recommendations(match, recommendations);
+    }
+
+    public Venue getMatch() {
+        return match;
     }
 
     public List<Venue> getVenues() {
