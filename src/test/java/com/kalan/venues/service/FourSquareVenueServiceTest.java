@@ -13,24 +13,26 @@ import java.util.List;
 
 import static com.kalan.venues.Matchers.feature;
 import static com.kalan.venues.model.Location.Builder.location;
+import static com.kalan.venues.model.Recommendations.recommendations;
+import static com.kalan.venues.model.Venue.venueWithLatLng;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class FourSquareVenueServiceTest {
+    private static final String LOCATION = "london";
+    private static final String VENUE = "spitafields";
+
     private FourSquareClient fourSquareClient = mock(FourSquareClient.class);
     private FourSquareVenueService fourSquareVenueService = new FourSquareVenueService(fourSquareClient);
 
     @Test
-    public void returnsRecommendations() {
-        String location = "london";
-        String venue = "spitafields";
-
-        when(fourSquareClient.search(location, venue))
-                .thenReturn(searchResult(matchingVenue("123", venue, new Location(10.0, 20.0))));
+    public void returnsFullRecommendations() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, new Location(10.0, 20.0))));
 
         when(fourSquareClient.explore(10.0, 20.0))
                 .thenReturn(new ExploreResult(exploreResponse(
@@ -41,7 +43,7 @@ public class FourSquareVenueServiceTest {
                                 exploreLocation("555 Pub street", 12.5, 22.5, "CAC DOD"),
                                 "Brewery")))));
 
-        assertThat(fourSquareVenueService.retrieveRecommendations(location, venue), feature(Recommendations::getVenues, contains(
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), allOf(feature(Recommendations::getVenues, contains(
                 Venue.venue("456", "Brown Cup", location()
                         .withAddress("123 Yellow Brick")
                         .withLat(12.1)
@@ -59,18 +61,51 @@ public class FourSquareVenueServiceTest {
                         .withCc("GB")
                         .withCity("London")
                         .withState("London")
-                        .withCountry("England").build(), "Brewery"))));
+                        .withCountry("England").build(), "Brewery"))),
+                feature(Recommendations::getMatch, equalTo(venueWithLatLng("123", VENUE, 10.0, 20.0)))));
     }
 
     @Test
-    public void returnsMatch() {
-        String location = "london";
-        String venue = "spitafields";
+    public void returnsMatchWithNoRecommendations() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, new Location(10.0, 20.0))));
 
-        when(fourSquareClient.search(location, venue))
-                .thenReturn(searchResult(matchingVenue("123", venue, new Location(10.0, 20.0))));
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), equalTo(recommendations(venueWithLatLng("123", VENUE, 10.0, 20.0), emptyList())));
+    }
 
-        assertThat(fourSquareVenueService.retrieveRecommendations(location, venue), feature(Recommendations::getMatch, equalTo(Venue.venue("123", venue, 10.0, 20.0))));
+    @Test
+    public void returnsEmptyWhenNoMatch() {
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), equalTo(recommendations(null, emptyList())));
+    }
+
+    @Test
+    public void returnsMatchWithNoCoordinates() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, null)));
+
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), feature(Recommendations::getMatch, equalTo(Venue.venue("123", VENUE, null, null))));
+    }
+
+    @Test
+    public void returnsGroupWhenNoItems() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, new Location(10.0, 20.0))));
+
+        when(fourSquareClient.explore(10.0, 20.0))
+                .thenReturn(new ExploreResult(new ExploreResponse(2, singletonList(new Group(null)))));
+
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), equalTo(recommendations(venueWithLatLng("123", VENUE, 10.0, 20.0), emptyList())));
+    }
+
+    @Test
+    public void returnsEmptyGroupWhenItemsWithNoVenues() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, new Location(10.0, 20.0))));
+
+        when(fourSquareClient.explore(10.0, 20.0))
+                .thenReturn(new ExploreResult(new ExploreResponse(2, singletonList(new Group(singletonList(new Item(null)))))));
+
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), equalTo(recommendations(venueWithLatLng("123", VENUE, 10.0, 20.0), emptyList())));
     }
 
     private ExploreResponse exploreResponse(Item... items) {

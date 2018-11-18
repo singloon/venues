@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import static com.kalan.venues.model.Location.Builder.location;
 import static com.kalan.venues.model.Recommendations.recommendations;
 import static com.kalan.venues.model.Venue.venue;
+import static com.kalan.venues.model.Venue.venueWithLatLng;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -67,7 +68,7 @@ public class VenuesTest {
         String venue = "spitafields";
 
         when(venueService.retrieveRecommendations(location, venue))
-                .thenReturn(recommendations(venue("000", "spitafields", 50.1, -0.06), asList(
+                .thenReturn(recommendations(venueWithLatLng("000", "spitafields", 50.1, -0.06), asList(
                         venue("123", "Beer O'Clock", location()
                                 .withAddress("79 Enid St")
                                 .withLat(51.497517)
@@ -134,7 +135,7 @@ public class VenuesTest {
         String venue = "spitafields";
 
         when(venueService.retrieveRecommendations(location, venue))
-                .thenReturn(recommendations(venue("101", "spitafields", 50.1, -0.06), emptyList()));
+                .thenReturn(recommendations(venueWithLatLng("101", "spitafields", 50.1, -0.06), emptyList()));
 
         mvc.perform(get(RECOMMENDATIONS)
                 .param("location", location)

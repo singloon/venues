@@ -97,13 +97,13 @@ public class Location {
             return this;
         }
 
-        public Builder withLat(double lat) {
+        public Builder withLat(Double lat) {
             this.lat = lat;
 
             return this;
         }
 
-        public Builder withLng(double lng) {
+        public Builder withLng(Double lng) {
             this.lng = lng;
 
             return this;

@@ -26,7 +26,7 @@ public class Venue {
         return new Venue(id, name, location, type);
     }
 
-    public static Venue venue(String id, String name, Double lat, Double lng) {
+    public static Venue venueWithLatLng(String id, String name, Double lat, Double lng) {
         return new Venue(id, name, Location.Builder.location().withLat(lat).withLng(lng).build(), null);
     }
 
@@ -36,7 +36,11 @@ public class Venue {
 
     public static Venue venue(com.kalan.venues.model.foursquare.search.Venue returned) {
         com.kalan.venues.model.foursquare.search.Location location = returned.getLocation();
-        return new Venue(returned.getId(), returned.getName(), Location.Builder.location().withLat(location.getLat()).withLng(location.getLng()).build(), null);
+
+        if (location != null) {
+            return new Venue(returned.getId(), returned.getName(), Location.Builder.location().withLat(location.getLat()).withLng(location.getLng()).build(), null);
+        }
+        return new Venue(returned.getId(), returned.getName(), null, null);
     }
 
     private static Location location(com.kalan.venues.model.foursquare.explore.Venue returned) {

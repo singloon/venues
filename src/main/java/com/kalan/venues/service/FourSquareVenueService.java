@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.kalan.venues.model.Recommendations.recommendations;
@@ -35,7 +36,8 @@ public class FourSquareVenueService implements VenueService {
     @Override
     public Recommendations retrieveRecommendations(String location, String venue) {
         SearchResult search = fourSquareClient.search(location, venue);
-        Optional<com.kalan.venues.model.foursquare.search.Venue> returnedVenue = ofNullable(search.getSearchResponse())
+
+        Optional<com.kalan.venues.model.foursquare.search.Venue> returnedVenue = ofNullable(search).map(SearchResult::getSearchResponse)
                 .map(SearchResponse::getVenues)
                 .flatMap(v -> v.stream().findFirst());
 
@@ -60,8 +62,10 @@ public class FourSquareVenueService implements VenueService {
                 .map(group ->
                         group.stream()
                                 .map(Group::getItems)
+                                .filter(Objects::nonNull)
                                 .flatMap(items -> items.stream()
                                         .map(Item::getVenue))
+                                .filter(Objects::nonNull)
                                 .collect(toList())).orElse(emptyList());
 
 
