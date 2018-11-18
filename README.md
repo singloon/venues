@@ -79,6 +79,6 @@ Response:
 
 ### Future/TODO
 
-1. De-dupe the original venue in case of dupe in recommendations.
-2. Pagination and limits for recommendations (we get the total results in response).
-3. Mark the VenueTest.java as Acceptance Test.
+1. Pagination and limits for recommendations (we get the total results in response).
+2. Mark the VenueTest.java as Acceptance Test.
+3. Add exception mapper and add validation for FourSquareClient.

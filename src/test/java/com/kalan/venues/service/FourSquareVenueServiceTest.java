@@ -108,6 +108,32 @@ public class FourSquareVenueServiceTest {
         assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), equalTo(recommendations(venueWithLatLng("123", VENUE, 10.0, 20.0), emptyList())));
     }
 
+    @Test
+    public void returnsDeDupedRecommendations() {
+        when(fourSquareClient.search(LOCATION, VENUE))
+                .thenReturn(searchResult(matchingVenue("123", VENUE, new Location(10.0, 20.0))));
+
+        when(fourSquareClient.explore(10.0, 20.0))
+                .thenReturn(new ExploreResult(exploreResponse(
+                        new Item(venue("123", "Brown Cup",
+                                exploreLocation("123 Yellow Brick", 12.1, 20.5, "AAA BBB"),
+                                "Coffee Shop")),
+                        new Item(venue("789", "Beer O'Clock",
+                                exploreLocation("555 Pub street", 12.5, 22.5, "CAC DOD"),
+                                "Brewery")))));
+
+        assertThat(fourSquareVenueService.retrieveRecommendations(LOCATION, VENUE), feature(Recommendations::getVenues, contains(
+                Venue.venue("789", "Beer O'Clock", location()
+                        .withAddress("555 Pub street")
+                        .withLat(12.5)
+                        .withLng(22.5)
+                        .withPostalCode("CAC DOD")
+                        .withCc("GB")
+                        .withCity("London")
+                        .withState("London")
+                        .withCountry("England").build(), "Brewery"))));
+    }
+
     private ExploreResponse exploreResponse(Item... items) {
         return new ExploreResponse(2, singletonList(new Group(Arrays.asList(items))));
     }

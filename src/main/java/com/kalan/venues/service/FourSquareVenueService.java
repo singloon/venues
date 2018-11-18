@@ -66,6 +66,7 @@ public class FourSquareVenueService implements VenueService {
                                 .flatMap(items -> items.stream()
                                         .map(Item::getVenue))
                                 .filter(Objects::nonNull)
+                                .filter(v -> !v.getId().equals(match.getId()))
                                 .collect(toList())).orElse(emptyList());
 
 
