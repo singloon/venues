@@ -3,7 +3,6 @@ package com.kalan.venues;
 import com.jayway.jsonpath.JsonPath;
 import com.kalan.venues.service.VenueService;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -18,7 +17,11 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
 
+import static com.kalan.venues.model.Location.Builder.location;
+import static com.kalan.venues.model.Venue.venue;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "CLIENT_SECRET=clientSecret"
 })
 public class VenuesTest {
-
     private static final String RECOMMENDATIONS = VenueController.RECOMMENDATIONS;
 
     @Autowired
@@ -58,10 +60,32 @@ public class VenuesTest {
     }
 
     @Test
-    @Ignore
     public void returnsRecommendedVenues() throws Exception {
         String location = "london";
         String venue = "spitafields";
+
+        when(venueService.retrieveRecommendations(location, venue))
+                .thenReturn(asList(
+                        venue("123", "Beer O'Clock", location()
+                                .withAddress("79 Enid St")
+                                .withLat(51.497517)
+                                .withLng(-0.072148)
+                                .withPostalCode("SE16 3RA")
+                                .withCc("GB")
+                                .withCity("London")
+                                .withState("Greater London")
+                                .withCountry("United Kingdom")
+                                .build(), "brewery"),
+                        venue("456", "Brown Cup", location()
+                                .withAddress("55 Waterloo St")
+                                .withLat(57.497517)
+                                .withLng(-0.092148)
+                                .withPostalCode("SE26 6YA")
+                                .withCc("GB")
+                                .withCity("London")
+                                .withState("Greater London")
+                                .withCountry("United Kingdom")
+                                .build(), "cafe")));
 
         mvc.perform(get(RECOMMENDATIONS)
                 .param("location", location)
@@ -103,6 +127,7 @@ public class VenuesTest {
     }
 
     private void hasJson(MvcResult result, String expected, String jsonPath) throws JSONException, UnsupportedEncodingException {
-        JSONAssert.assertEquals(expected, JsonPath.parse(result.getResponse().getContentAsString()).read(jsonPath, String.class), JSONCompareMode.STRICT);
+        String response = JsonPath.read(result.getResponse().getContentAsString(), jsonPath).toString();
+        JSONAssert.assertEquals(expected, response, JSONCompareMode.STRICT);
     }
 }

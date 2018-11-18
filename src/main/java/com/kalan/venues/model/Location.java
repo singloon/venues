@@ -6,18 +6,16 @@ public class Location {
     private final String address;
     private final Double lat;
     private final Double lng;
-    private final Integer distance;
     private final String postalCode;
     private final String cc;
     private final String city;
     private final String state;
     private final String country;
 
-    private Location(String address, Double lat, Double lng, Integer distance, String postalCode, String cc, String city, String state, String country) {
+    private Location(String address, Double lat, Double lng, String postalCode, String cc, String city, String state, String country) {
         this.address = address;
         this.lat = lat;
         this.lng = lng;
-        this.distance = distance;
         this.postalCode = postalCode;
         this.cc = cc;
         this.city = city;
@@ -29,7 +27,6 @@ public class Location {
         this.address = builder.address;
         this.lat = builder.lat;
         this.lng = builder.lng;
-        this.distance = builder.distance;
         this.postalCode = builder.postalCode;
         this.cc = builder.countryCode;
         this.city = builder.city;
@@ -38,7 +35,7 @@ public class Location {
     }
 
     public static Location location(com.kalan.venues.model.foursquare.explore.Location location) {
-        return new Location(location.getAddress(), location.getLat(), location.getLng(), location.getDistance(),
+        return new Location(location.getAddress(), location.getLat(), location.getLng(),
                 location.getPostalCode(), location.getCc(), location.getCity(), location.getState(),
                 location.getCountry());
     }
@@ -53,10 +50,6 @@ public class Location {
 
     public Double getLng() {
         return lng;
-    }
-
-    public Integer getDistance() {
-        return distance;
     }
 
     public String getPostalCode() {
@@ -81,9 +74,8 @@ public class Location {
 
     public static class Builder {
         private String address;
-        private double lat;
-        private double lng;
-        private int distance;
+        private Double lat;
+        private Double lng;
         private String postalCode;
         private String countryCode;
         private String city;
@@ -108,12 +100,6 @@ public class Location {
 
         public Builder withLng(double lng) {
             this.lng = lng;
-
-            return this;
-        }
-
-        public Builder withDistance(int distance) {
-            this.distance = distance;
 
             return this;
         }
@@ -161,7 +147,6 @@ public class Location {
         return Objects.equals(address, location.address) &&
                 Objects.equals(lat, location.lat) &&
                 Objects.equals(lng, location.lng) &&
-                Objects.equals(distance, location.distance) &&
                 Objects.equals(postalCode, location.postalCode) &&
                 Objects.equals(cc, location.cc) &&
                 Objects.equals(city, location.city) &&
@@ -171,7 +156,7 @@ public class Location {
 
     @Override
     public int hashCode() {
-        return Objects.hash(address, state, lng, distance, postalCode, cc, city, state, country);
+        return Objects.hash(address, state, lng, postalCode, cc, city, state, country);
     }
 
     @Override
@@ -180,7 +165,6 @@ public class Location {
                 "address='" + address + '\'' +
                 ", lat=" + lat +
                 ", lng=" + lng +
-                ", distance=" + distance +
                 ", postalCode='" + postalCode + '\'' +
                 ", cc='" + cc + '\'' +
                 ", city='" + city + '\'' +
