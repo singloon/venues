@@ -1,5 +1,6 @@
 package com.kalan.venues.service;
 
+import com.kalan.venues.model.ApiException;
 import com.kalan.venues.model.Credentials;
 import com.kalan.venues.model.foursquare.explore.ExploreResult;
 import com.kalan.venues.model.foursquare.search.SearchResult;
@@ -26,7 +27,7 @@ public class FourSquareClient {
     }
 
     public SearchResult search(String location, String venue) {
-        return restTemplate.exchange(
+        ResponseEntity<SearchResult> searchResponse = restTemplate.exchange(
                 url(SEARCH, credentials)
                         .queryParam("query", venue)
                         .queryParam("near", location)
@@ -34,17 +35,31 @@ public class FourSquareClient {
                         .toUriString(),
                 HttpMethod.GET,
                 headers(),
-                SearchResult.class).getBody();
+                SearchResult.class);
+
+        if (!searchResponse.getStatusCode().is2xxSuccessful()) {
+            throw apiException(searchResponse.getStatusCodeValue(), searchResponse.getStatusCode().getReasonPhrase());
+        }
+        return searchResponse.getBody();
     }
 
     public ExploreResult explore(Double lat, Double lng) {
-        return restTemplate.exchange(
+        ResponseEntity<ExploreResult> exploreResponse = restTemplate.exchange(
                 url(EXPLORE, credentials)
                         .queryParam("ll", latLong(lat, lng))
                         .toUriString(),
                 HttpMethod.GET,
                 headers(),
-                ExploreResult.class).getBody();
+                ExploreResult.class);
+
+        if (!exploreResponse.getStatusCode().is2xxSuccessful()) {
+            throw apiException(exploreResponse.getStatusCodeValue(), exploreResponse.getStatusCode().getReasonPhrase());
+        }
+        return exploreResponse.getBody();
+    }
+
+    private ApiException apiException(int statusCode, String reasonPhrase) {
+        return new ApiException(statusCode, reasonPhrase);
     }
 
     private String latLong(Double lat, Double lng) {

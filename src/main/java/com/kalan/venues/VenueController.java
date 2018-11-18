@@ -43,7 +43,7 @@ public class VenueController {
             @RequestParam(value = "venue") String venue) {
 
         RecommendationsResource recommendationsResource = ofNullable(venueService.retrieveRecommendations(ofNullable(location).orElse(DEFAULT_LOCATION), venue))
-                .map(r -> new RecommendationsResource(r.getMatch(), r.getVenues()))
+                .map(recommendations -> new RecommendationsResource(recommendations.getMatch(), recommendations.getVenues()))
                 .orElse(new RecommendationsResource(null, emptyList()));
 
         recommendationsResource.add(linkTo(methodOn(VenueController.class).recommendations(location, venue)).withSelfRel());

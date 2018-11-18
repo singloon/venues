@@ -1,6 +1,7 @@
 package com.kalan.venues;
 
 import com.jayway.jsonpath.JsonPath;
+import com.kalan.venues.model.ApiException;
 import com.kalan.venues.service.VenueService;
 import org.json.JSONException;
 import org.junit.Test;
@@ -159,6 +160,20 @@ public class VenuesTest {
                 "  \"lat\": 50.1,\n" +
                 "  \"lng\": -0.06\n" +
                 "}", "$.match.location"));
+    }
+
+    @Test
+    public void returnsExceptionMappedStatus() throws Exception {
+        String location = "london";
+        String venue = "spitafields";
+
+        when(venueService.retrieveRecommendations(location, venue)).thenThrow(new ApiException(503, "Incorrect Params"));
+
+        mvc.perform(get(RECOMMENDATIONS)
+                .param("location", location)
+                .param("venue", venue)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isServiceUnavailable());
     }
 
     private void hasJson(MvcResult result, String expected, String jsonPath) throws JSONException, UnsupportedEncodingException {

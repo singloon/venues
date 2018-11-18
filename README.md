@@ -81,4 +81,3 @@ Response:
 
 1. Pagination and limits for recommendations (we get the total results in response).
 2. Mark the VenueTest.java as Acceptance Test.
-3. Add exception mapper and add validation for FourSquareClient.
