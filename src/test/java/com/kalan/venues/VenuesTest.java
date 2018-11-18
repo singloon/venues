@@ -1,6 +1,7 @@
 package com.kalan.venues;
 
 import com.jayway.jsonpath.JsonPath;
+import com.kalan.venues.service.VenueService;
 import org.json.JSONException;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -9,6 +10,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,12 +26,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(VenueController.class)
+@TestPropertySource(properties = {
+        "CLIENT_ID=clientId",
+        "CLIENT_SECRET=clientSecret"
+})
 public class VenuesTest {
 
     private static final String RECOMMENDATIONS = VenueController.RECOMMENDATIONS;
 
     @Autowired
     private MockMvc mvc;
+
+    @MockBean
+    private VenueService venueService;
 
     @Test
     public void returnsSelfLink() throws Exception {
@@ -50,9 +60,12 @@ public class VenuesTest {
     @Test
     @Ignore
     public void returnsRecommendedVenues() throws Exception {
+        String location = "london";
+        String venue = "spitafields";
+
         mvc.perform(get(RECOMMENDATIONS)
-                .param("location", "london")
-                .param("venue", "spitafields")
+                .param("location", location)
+                .param("venue", venue)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(result -> hasJson(result, "[\n" +
