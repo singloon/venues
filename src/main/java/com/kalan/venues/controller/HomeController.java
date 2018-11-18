@@ -1,4 +1,4 @@
-package com.kalan.venues;
+package com.kalan.venues.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

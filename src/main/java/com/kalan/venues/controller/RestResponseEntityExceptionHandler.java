@@ -1,4 +1,4 @@
-package com.kalan.venues;
+package com.kalan.venues.controller;
 
 import com.kalan.venues.model.ApiException;
 import org.springframework.http.HttpHeaders;
