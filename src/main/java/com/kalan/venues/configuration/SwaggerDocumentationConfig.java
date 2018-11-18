@@ -29,6 +29,7 @@ public class SwaggerDocumentationConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.kalan.venues"))
                 .paths(PathSelectors.ant("/v1/**"))
                 .build()
+                .useDefaultResponseMessages(false)
                 .apiInfo(apiInfo());
     }
 }

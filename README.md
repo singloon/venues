@@ -82,6 +82,3 @@ Response:
 1. De-dupe the original venue in case of dupe in recommendations.
 2. Pagination and limits for recommendations (we get the total results in response).
 3. Mark the VenueTest.java as Acceptance Test.
-4. Default location if not provided.
-
-

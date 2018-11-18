@@ -24,6 +24,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Api(value = "venue", description = "the venue API")
 public class VenueController {
     public static final String RECOMMENDATIONS = "/v1/recommendations";
+    private static final String DEFAULT_LOCATION = "london";
 
     private final VenueService venueService;
 
@@ -41,7 +42,7 @@ public class VenueController {
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "venue") String venue) {
 
-        RecommendationsResource recommendationsResource = ofNullable(venueService.retrieveRecommendations(location, venue))
+        RecommendationsResource recommendationsResource = ofNullable(venueService.retrieveRecommendations(ofNullable(location).orElse(DEFAULT_LOCATION), venue))
                 .map(r -> new RecommendationsResource(r.getMatch(), r.getVenues()))
                 .orElse(new RecommendationsResource(null, emptyList()));
 

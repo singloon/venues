@@ -24,6 +24,7 @@ import static com.kalan.venues.model.Venue.venueWithLatLng;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -53,6 +54,16 @@ public class VenuesTest {
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.self.href", equalTo("http://localhost/v1/recommendations?location=london&venue=spitafields")));
+    }
+
+    @Test
+    public void defaultsLocationToLondonIfNotProvided() throws Exception {
+        mvc.perform(get(RECOMMENDATIONS)
+                .param("venue", "spitafields")
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(venueService).retrieveRecommendations("london", "spitafields");
     }
 
     @Test
